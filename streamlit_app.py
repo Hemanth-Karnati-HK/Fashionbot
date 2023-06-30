@@ -22,6 +22,16 @@ def chat_with_gpt3(messages):
     )
     return response.choices[0].message['content']
 
+# Get DALL-E image from description
+def get_dalle_image(description):
+    response = openai.Image.create(
+        prompt=description,
+        n=1,
+        size="1024x1024"
+    )
+    image_url = response['data'][0]['url']
+    return image_url
+
 # Create title for the app
 st.title("Fashion Recommendation Assistant")
 
@@ -76,6 +86,16 @@ if st.button("End Chat"):
     # Clear the conversation
     st.session_state.conversation = []
     st.success("Chat ended.")
+
+if st.button("Generate"):
+    # Generate a detailed description
+    description = f"A {gender}-appropriate shirt suited for someone in {location} who likes {', '.join(fashion_likes)} fashion. The shirt should be in size {', '.join(sizes)} and resonate with the styles of {favorite_influencers}."
+
+    # Get the generated image URL
+    image_url = get_dalle_image(description)
+
+    # Display the image
+    st.image(image_url)
 
 # Display clothes
 st.header("Search the store")
