@@ -1,5 +1,4 @@
 import streamlit as st
-import session_state  # this is from the streamlit-session-state package
 import json
 import requests
 import openai
@@ -37,40 +36,45 @@ favorite_brands = st.sidebar.multiselect("What are your favorite brands?", optio
 favorite_influencers = st.sidebar.text_input("Who are your favorite fashion influencers?")
 looking_for = st.sidebar.text_input("What are you looking for specifically?")
 
-# Get the current session state
-state = session_state.get(conversation=[], user_message='')
+# Initialize session state
+if "conversation" not in st.session_state:
+    st.session_state.conversation = []
+
+if "user_message" not in st.session_state:
+    st.session_state.user_message = ""
 
 # Start conversation with the AI assistant greeting the user
 st.header("Chat with the Assistant")
 st.write("Assistant: Hi there! How can I assist you with your fashion choices today?")
 
 # User input and button
-state.user_message = st.text_input("Your message:", state.user_message)
+st.session_state.user_message = st.text_input("Your message:", st.session_state.user_message)
+
 if st.button("Send"):
     # User preferences
     user_preferences = f"I am a {gender} from {location} interested in {', '.join(fashion_likes)} fashion. I typically wear size {', '.join(sizes)}. My favorite brands are {', '.join(favorite_brands)} and I'm influenced by {favorite_influencers}. Currently, I'm looking for {looking_for}."
 
     # Update the conversation
-    state.conversation.append({"role": "user", "content": user_preferences})
-    state.conversation.append({"role": "user", "content": state.user_message})
+    st.session_state.conversation.append({"role": "user", "content": user_preferences})
+    st.session_state.conversation.append({"role": "user", "content": st.session_state.user_message})
 
     # Get the AI response
-    response = chat_with_gpt3(state.conversation)
+    response = chat_with_gpt3(st.session_state.conversation)
 
     # Append the response to the conversation
-    state.conversation.append({"role": "assistant", "content": response})
+    st.session_state.conversation.append({"role": "assistant", "content": response})
 
     # Empty the text input for the next message
-    state.user_message = ""
+    st.session_state.user_message = ""
 
 # Display conversation history
-for message in state.conversation:
+for message in st.session_state.conversation:
     st.write(f"{message['role'].capitalize()}: {message['content']}")
 
 # End of the chat
 if st.button("End Chat"):
     # Clear the conversation
-    state.conversation = []
+    st.session_state.conversation = []
     st.success("Chat ended.")
 
 # Display clothes
