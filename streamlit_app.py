@@ -87,6 +87,8 @@ if st.button("End Chat"):
     st.session_state.conversation = []
     st.success("Chat ended.")
 
+# Generate DALL-E Image
+st.header("See Some Surprise!")
 if st.button("Generate"):
     # Generate a detailed description
     description = f"A {gender}-appropriate shirt suited for someone in {location} who likes {', '.join(fashion_likes)} fashion. The shirt should be in size {', '.join(sizes)} and resonate with the styles of {favorite_influencers}."
