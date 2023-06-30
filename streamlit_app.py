@@ -5,7 +5,7 @@ import openai
 from PIL import Image
 import os
 
-openai.api_key = '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'
+openai.api_key = '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'
 
 # Load JSON data from files in a directory
 clothes_data = []
@@ -36,17 +36,33 @@ favorite_brands = st.sidebar.multiselect("What are your favorite brands?", optio
 favorite_influencers = st.sidebar.text_input("Who are your favorite fashion influencers?")
 looking_for = st.sidebar.text_input("What are you looking for specifically?")
 
-# Store conversation
-conversation_history = st.text_area('Conversation History:', "")
-current_message = st.text_input("Your message:")
+# Start conversation with the AI assistant greeting the user
+st.header("Chat with the Assistant")
+with st.empty():
+    st.write("Assistant: Hi there! How can I assist you with your fashion choices today?")
+conversation = [{"role": "system", "content": "You are a helpful assistant."}]
+while True:
+    user_message = st.text_input("Your message:")
+    if user_message:
+        # User preferences
+        user_preferences = f"I am a {gender} from {location} interested in {', '.join(fashion_likes)} fashion. I typically wear size {', '.join(sizes)}. My favorite brands are {', '.join(favorite_brands)} and I'm influenced by {favorite_influencers}. Currently, I'm looking for {looking_for}."
 
-# Update conversation history and chat with AI when user enters a message
-if st.button("Send"):
-    conversation_history += f"\nUser: {current_message}"
-    conversation = [{"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": current_message}]
-    response = chat_with_gpt3(conversation)
-    conversation_history += f"\nAI: {response}"
+        # Update the conversation
+        conversation.append({"role": "user", "content": user_preferences})
+        conversation.append({"role": "user", "content": user_message})
+
+        # Get the AI response
+        response = chat_with_gpt3(conversation)
+        
+        # Print the response
+        with st.empty():
+            st.write(f"Assistant: {response}")
+
+        # Empty the text input for the next message
+        user_message = ""
+
+    if st.button("End Chat"):
+        break
 
 # Display clothes
 st.header("Search the store")
