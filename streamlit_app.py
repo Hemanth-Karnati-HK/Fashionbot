@@ -11,7 +11,7 @@ openai.api_key = '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'
 clothes_data = []
 for file_name in os.listdir('data'):  # replace with your directory
     if file_name.endswith('.json'):
-        with open(file_name) as f:
+        with open(os.path.join('data', file_name)) as f:
             clothes_data.extend(json.load(f))
 
 # Handles conversation with OpenAI Model
