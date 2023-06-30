@@ -1,5 +1,5 @@
 streamlit
-json
 requests
 openai
 Pillow
+
