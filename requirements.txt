@@ -2,5 +2,5 @@ streamlit
 requests
 openai
 Pillow
-streamlit-session-state
+git+https://github.com/gjoseph92/streamlit-session-state.git#egg=streamlit-session-state
 
