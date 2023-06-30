@@ -9,7 +9,7 @@ openai.api_key = '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'
 
 # Load JSON data from files in a directory
 clothes_data = []
-for file_name in os.listdir('path_to_your_json_files'):  # replace with your directory
+for file_name in os.listdir('data'):  # replace with your directory
     if file_name.endswith('.json'):
         with open(file_name) as f:
             clothes_data.extend(json.load(f))
