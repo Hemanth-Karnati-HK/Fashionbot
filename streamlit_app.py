@@ -1,11 +1,16 @@
 import streamlit as st
 import json
 import requests
-import openai
 from PIL import Image
 import os
+from recombee_api_client.api_client import RecombeeClient
+from recombee_api_client.api_requests import AddItem, AddDetailView, RecommendItemsToUser
+import openai
 
+# Your keys should be stored in a secure manner, not directly in the code
 openai.api_key = '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'
+client = RecombeeClient('refine-dev', 'BFozzPb3yjxny8p321hDfT5TQPRQF7ytoFvAKT9dIwDJD9M9Rx7HclcgrkGPCnh')
+
 
 # Load JSON data from files in a directory
 clothes_data = []
@@ -32,8 +37,27 @@ def get_dalle_image(description):
     image_url = response['data'][0]['url']
     return image_url
 
+# Record an interaction when a user views an item
+def record_user_interaction(user_id, item_id):
+    client.send(AddDetailView(user_id, item_id, cascade_create=True))
+
+# Get recommendations for a user
+def get_recommendations(user_id, count):
+    recommended = client.send(RecommendItemsToUser(user_id, count))
+    return recommended['recomms']
+
 # Create title for the app
 st.title("Fashion Recommendation Assistant")
+
+# Ask the user to enter a username at the start of the app
+if "username" not in st.session_state:
+    st.session_state.username = st.text_input("Enter a username to start:")
+    if st.session_state.username:
+        st.success(f"Welcome, {st.session_state.username}!")
+    else:
+        st.stop()  # Stop execution until a username is entered
+else:
+    st.write(f"Welcome back, {st.session_state.username}!")
 
 # Create sidebar for user preferences
 st.sidebar.header("Tell us about your preferences")
@@ -86,6 +110,22 @@ if st.button("End Chat"):
     # Clear the conversation
     st.session_state.conversation = []
     st.success("Chat ended.")
+    
+    # Filter clothes based on user preferences
+    filtered_clothes = [item for item in clothes_data 
+                        if favorite_brands in item.get("brandName", "").lower()
+                        and sizes in item.get("sizes", "")
+                        and (looking_for.lower() in item.get("description", "").lower() or looking_for.lower() in item.get("brandName", "").lower())]
+
+    # Get recommendations from the filtered clothes
+    for item in filtered_clothes:
+        client.send(AddItem(item['id'], {'brandName': item['brandName'], 'description': item['description'], 'imageLink': item['imageLink'], 'price': item['price'], 'sizes': item['sizes']}))
+
+    # Display some recommendations
+    st.header("Recommended for you")
+    recommended_item_ids = get_recommendations(st.session_state.username, 10)
+    recommended_items = [item for item in filtered_clothes if item['id'] in recommended_item_ids]
+    display_items(recommended_items)
 
 # Generate DALL-E Image
 st.header("See Some Surprise!")
@@ -99,38 +139,3 @@ if st.button("Generate"):
     # Display the image
     st.image(image_url)
 
-# Display clothes
-st.header("Search the store")
-search_term = st.text_input("Search for clothes")
-search_price = st.text_input("Search by price range (e.g. 100-200)")
-
-# Filter clothes based on search term and price range
-filtered_clothes = [item for item in clothes_data 
-                    if search_term.lower() in item.get("brandName", "").lower() 
-                    or search_term.lower() in item.get("description", "").lower()
-                    or (search_price and item.get("price") and int(search_price.split('-')[0]) <= int(item.get("price")) <= int(search_price.split('-')[1]))]
-
-for item in filtered_clothes:
-    # Get item details
-    image_link = item.get("imageLink")
-    brand_name = item.get("brandName")
-    description = item.get("description")
-    price = item.get("price")
-    sizes = item.get("sizes")
-
-    # Display item details
-    st.subheader(f"{brand_name} - {description}")
-    if price:
-        st.text(f"Price: {price}")
-    else:
-        st.text("Price: Not Available")
-    st.text(f"Available Sizes: {sizes}")
-
-    # Display item image
-    try:
-        image = Image.open(requests.get(image_link, stream=True).raw)
-        st.image(image, caption=f"{brand_name} - {description}")
-    except Exception as e:
-        st.write("Image not available")
-
-    st.markdown("---")  # add a separator
