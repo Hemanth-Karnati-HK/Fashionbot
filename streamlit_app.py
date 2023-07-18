@@ -122,6 +122,8 @@ for message in st.session_state.conversation:
     st.write(f"{message['role'].capitalize()}: {message['content']}")
 
 
+# ...
+
 # End of the chat
 if st.button("End Chat"):
     # Clear the conversation
@@ -141,24 +143,28 @@ if st.button("End Chat"):
         st.write(f"Description: {item['description']}")
         st.image(item['imageLink'])
         st.write(f"Price: {item['price']}")
-        st.write(f"Sizes: {', '.join(item['sizes'])}")
+        st.write(f"Sizes: {item['sizes']}")
         st.write("------")
 
     # Get recommendations from the filtered clothes
-    for item in filtered_clothes:
-        client.send(AddItem(item['id'], {'brandName': item['brandName'], 'description': item['description'], 'imageLink': item['imageLink'], 'price': item['price'], 'sizes': item['sizes']}))
+    for index, item in enumerate(filtered_clothes):
+        item_id = f"item_{index}"  # Generate an ID using index
+        try:
+            client.send(AddItem(item_id, {'brandName': item['brandName'], 'description': item['description'], 'imageLink': item['imageLink'], 'price': item['price'], 'sizes': item['sizes']}))
+        except KeyError:
+            print(f"Skipping item due to missing key: {item}")
 
     # Display some recommendations
     st.header("Recommended for you")
     recommended_item_ids = get_recommendations(st.session_state.username, 10)
-    recommended_items = [item for item in filtered_clothes if item['id'] in recommended_item_ids]
+    recommended_items = [item for index, item in enumerate(filtered_clothes) if f"item_{index}" in recommended_item_ids]
 
     for item in recommended_items:
         st.write(f"Brand: {item['brandName']}")
         st.write(f"Description: {item['description']}")
         st.image(item['imageLink'])
         st.write(f"Price: {item['price']}")
-        st.write(f"Sizes: {', '.join(item['sizes'])}")
+        st.write(f"Sizes: {item['sizes']}")
         st.write("------")
 
 # Generate DALL-E Image
@@ -172,7 +178,3 @@ if st.button("Generate"):
 
     # Display the image
     st.image(image_url)
-
-    # Display the image
-    st.image(image_url)
-
