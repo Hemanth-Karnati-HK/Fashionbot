@@ -141,13 +141,15 @@ filtered_clothes = [item for item in clothes_data
 for index, item in enumerate(filtered_clothes):
     item_id = f"item_{index}"  # Generate an ID using index
     try:
-        client.send(AddItem(item_id, {
+        # Ensure item properties are properly formatted
+        item_properties = {
             'brandName': item.get('brandName', ''),
             'description': item.get('description', ''),
             'imageLink': item.get('imageLink', ''),
             'price': item.get('price', ''),
             'sizes': item.get('sizes', '')
-        }))
+        }
+        client.send(AddItem(item_id, item_properties))
     except Exception as e:
         print(f"Error adding item {item_id} to Recombee: {e}")
 
@@ -157,7 +159,7 @@ recommended_item_ids = get_recommendations(st.session_state.username, 10)
 recommended_items = [item for index, item in enumerate(filtered_clothes) if f"item_{index}" in recommended_item_ids]
 
 for item in recommended_items:
-    col1, col2 = st.beta_columns(2)
+    col1, col2 = st.columns(2)
     with col1:
         st.write(f"Brand: {item['brandName']}")
         st.write(f"Description: {item['description']}")
@@ -170,7 +172,7 @@ for item in recommended_items:
 # Display filtered clothes
 st.header("Filtered Clothes for You")
 for item in filtered_clothes:
-    col1, col2 = st.beta_columns(2)
+    col1, col2 = st.columns(2)
     with col1:
         st.write(f"Brand: {item['brandName']}")
         st.write(f"Description: {item['description']}")
