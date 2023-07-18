@@ -21,30 +21,46 @@ for file_name in os.listdir('data'):  # replace with your directory
 
 # Handles conversation with OpenAI Model
 def chat_with_gpt3(messages):
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo", 
-        messages=messages
-    )
-    return response.choices[0].message['content']
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo", 
+            messages=messages
+        )
+        return response.choices[0].message['content']
+    except Exception as e:
+        print(f"Error in chat_with_gpt3: {e}")
+        return "Error in generating AI response"
 
 # Get DALL-E image from description
 def get_dalle_image(description):
-    response = openai.Image.create(
-        prompt=description,
-        n=1,
-        size="1024x1024"
-    )
-    image_url = response['data'][0]['url']
-    return image_url
+    try:
+        response = openai.Image.create(
+            prompt=description,
+            n=1,
+            size="1024x1024"
+        )
+        image_url = response['data'][0]['url']
+        return image_url
+    except Exception as e:
+        print(f"Error in get_dalle_image: {e}")
+        return None
 
 # Record an interaction when a user views an item
 def record_user_interaction(user_id, item_id):
-    client.send(AddDetailView(user_id, item_id, cascade_create=True))
+    try:
+        client.send(AddDetailView(user_id, item_id, cascade_create=True))
+    except Exception as e:
+        print(f"Error in record_user_interaction: {e}")
 
 # Get recommendations for a user
 def get_recommendations(user_id, count):
-    recommended = client.send(RecommendItemsToUser(user_id, count))
-    return recommended['recomms']
+    try:
+        recommended = client.send(RecommendItemsToUser(user_id, count))
+        return recommended['recomms']
+    except Exception as e:
+        print(f"Error in get_recommendations: {e}")
+        return []
+
 
 # Create title for the app
 st.title("Fashion Recommendation Assistant")
