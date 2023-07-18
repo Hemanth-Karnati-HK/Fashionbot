@@ -9,7 +9,7 @@ import openai
 
 # Your keys should be stored in a secure manner, not directly in the code
 openai.api_key = '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'
-client = RecombeeClient('refine-dev', 'BFozzPb3yjxny8p321hDfT5TQPRQF7ytoFvAKT9dIwDJD9M9Rx7HclcgrkGPCnh')
+client = RecombeeClient('refine-dev', 'BFozzPb3yjxny8p321hDfT5TQPRQF7ytoFvAKT9dIwDJD9M9Rx7HclcgrkGPCnh9',region=Region.US_WEST)
 
 # Load JSON data from files in a directory
 clothes_data = []
