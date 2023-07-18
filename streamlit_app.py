@@ -121,17 +121,28 @@ if st.button("Send"):
 for message in st.session_state.conversation:
     st.write(f"{message['role'].capitalize()}: {message['content']}")
 
+
 # End of the chat
 if st.button("End Chat"):
     # Clear the conversation
     st.session_state.conversation = []
     st.success("Chat ended.")
-    
-    # Filter clothes based on user preferences
+
+    # Filter clothes based on user preferences and sizes
     filtered_clothes = [item for item in clothes_data 
-                        if favorite_brands in item.get("brandName", "").lower()
-                        and sizes in item.get("sizes", "")
-                        and (looking_for.lower() in item.get("description", "").lower() or looking_for.lower() in item.get("brandName", "").lower())]
+                        if (not favorite_brands or favorite_brands in item.get("brandName", "").lower())
+                        and (not sizes or any(size in item.get("sizes", "") for size in sizes))
+                        and (not looking_for or looking_for.lower() in item.get("description", "").lower() or looking_for.lower() in item.get("brandName", "").lower())]
+
+    # Display filtered clothes
+    st.header("Filtered Clothes for You")
+    for item in filtered_clothes:
+        st.write(f"Brand: {item['brandName']}")
+        st.write(f"Description: {item['description']}")
+        st.image(item['imageLink'])
+        st.write(f"Price: {item['price']}")
+        st.write(f"Sizes: {', '.join(item['sizes'])}")
+        st.write("------")
 
     # Get recommendations from the filtered clothes
     for item in filtered_clothes:
@@ -141,7 +152,14 @@ if st.button("End Chat"):
     st.header("Recommended for you")
     recommended_item_ids = get_recommendations(st.session_state.username, 10)
     recommended_items = [item for item in filtered_clothes if item['id'] in recommended_item_ids]
-    display_items(recommended_items)
+
+    for item in recommended_items:
+        st.write(f"Brand: {item['brandName']}")
+        st.write(f"Description: {item['description']}")
+        st.image(item['imageLink'])
+        st.write(f"Price: {item['price']}")
+        st.write(f"Sizes: {', '.join(item['sizes'])}")
+        st.write("------")
 
 # Generate DALL-E Image
 st.header("See Some Surprise!")
@@ -151,6 +169,9 @@ if st.button("Generate"):
 
     # Get the generated image URL
     image_url = get_dalle_image(description)
+
+    # Display the image
+    st.image(image_url)
 
     # Display the image
     st.image(image_url)
