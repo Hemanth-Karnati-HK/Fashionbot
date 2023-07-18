@@ -138,20 +138,28 @@ filtered_clothes = [item for item in clothes_data
                     and (not looking_for or looking_for.lower() in item.get("description", "").lower() or looking_for.lower() in item.get("brandName", "").lower())]
 
 # Get recommendations from the filtered clothes
+# for index, item in enumerate(filtered_clothes):
+#     item_id = f"item_{index}"  # Generate an ID using index
+#     try:
+#         # Ensure item properties are properly formatted
+#         item_properties = {
+#             'brandName': item.get('brandName', ''),
+#             'description': item.get('description', ''),
+#             'imageLink': item.get('imageLink', ''),
+#             'price': item.get('price', ''),
+#             'sizes': item.get('sizes', '')
+#         }
+#         client.send(AddItem(item_id, item_properties))
+#     except Exception as e:
+#         print(f"Error adding item {item_id} to Recombee: {e}")
+# Get recommendations from the filtered clothes
 for index, item in enumerate(filtered_clothes):
     item_id = f"item_{index}"  # Generate an ID using index
     try:
-        # Ensure item properties are properly formatted
-        item_properties = {
-            'brandName': item.get('brandName', ''),
-            'description': item.get('description', ''),
-            'imageLink': item.get('imageLink', ''),
-            'price': item.get('price', ''),
-            'sizes': item.get('sizes', '')
-        }
-        client.send(AddItem(item_id, item_properties))
+        client.send(AddItem(item_id))
     except Exception as e:
         print(f"Error adding item {item_id} to Recombee: {e}")
+
 
 # Display some recommendations
 st.header("Recommended for you")
