@@ -134,16 +134,22 @@ if st.button("Generate"):
 # Filter clothes based on user preferences and sizes
 filtered_clothes = [item for item in clothes_data 
                     if (not favorite_brands or favorite_brands in item.get("brandName", "").lower())
-                    and (not sizes or any(size in item.get("sizes", "") for size in sizes))
+                    and (not sizes or any(size.lower() in item.get("sizes", "").lower() for size in sizes))
                     and (not looking_for or looking_for.lower() in item.get("description", "").lower() or looking_for.lower() in item.get("brandName", "").lower())]
 
 # Get recommendations from the filtered clothes
 for index, item in enumerate(filtered_clothes):
     item_id = f"item_{index}"  # Generate an ID using index
     try:
-        client.send(AddItem(item_id, {'brandName': item['brandName'], 'description': item['description'], 'imageLink': item['imageLink'], 'price': item['price'], 'sizes': item['sizes']}))
-    except KeyError:
-        print(f"Skipping item due to missing key: {item}")
+        client.send(AddItem(item_id, {
+            'brandName': item.get('brandName', ''),
+            'description': item.get('description', ''),
+            'imageLink': item.get('imageLink', ''),
+            'price': item.get('price', ''),
+            'sizes': item.get('sizes', '')
+        }))
+    except Exception as e:
+        print(f"Error adding item {item_id} to Recombee: {e}")
 
 # Display some recommendations
 st.header("Recommended for you")
