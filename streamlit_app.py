@@ -11,7 +11,6 @@ import openai
 openai.api_key = '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'
 client = RecombeeClient('refine-dev', 'BFozzPb3yjxny8p321hDfT5TQPRQF7ytoFvAKT9dIwDJD9M9Rx7HclcgrkGPCnh')
 
-
 # Load JSON data from files in a directory
 clothes_data = []
 for file_name in os.listdir('data'):  # replace with your directory
@@ -60,7 +59,6 @@ def get_recommendations(user_id, count):
     except Exception as e:
         print(f"Error in get_recommendations: {e}")
         return []
-
 
 # Create title for the app
 st.title("Fashion Recommendation Assistant")
@@ -121,52 +119,6 @@ if st.button("Send"):
 for message in st.session_state.conversation:
     st.write(f"{message['role'].capitalize()}: {message['content']}")
 
-
-# ...
-
-# End of the chat
-if st.button("End Chat"):
-    # Clear the conversation
-    st.session_state.conversation = []
-    st.success("Chat ended.")
-
-    # Filter clothes based on user preferences and sizes
-    filtered_clothes = [item for item in clothes_data 
-                        if (not favorite_brands or favorite_brands in item.get("brandName", "").lower())
-                        and (not sizes or any(size in item.get("sizes", "") for size in sizes))
-                        and (not looking_for or looking_for.lower() in item.get("description", "").lower() or looking_for.lower() in item.get("brandName", "").lower())]
-
-    # Display filtered clothes
-    st.header("Filtered Clothes for You")
-    for item in filtered_clothes:
-        st.write(f"Brand: {item['brandName']}")
-        st.write(f"Description: {item['description']}")
-        st.image(item['imageLink'])
-        st.write(f"Price: {item['price']}")
-        st.write(f"Sizes: {item['sizes']}")
-        st.write("------")
-
-    # Get recommendations from the filtered clothes
-    for index, item in enumerate(filtered_clothes):
-        item_id = f"item_{index}"  # Generate an ID using index
-        try:
-            client.send(AddItem(item_id, {'brandName': item['brandName'], 'description': item['description'], 'imageLink': item['imageLink'], 'price': item['price'], 'sizes': item['sizes']}))
-        except KeyError:
-            print(f"Skipping item due to missing key: {item}")
-
-    # Display some recommendations
-    st.header("Recommended for you")
-    recommended_item_ids = get_recommendations(st.session_state.username, 10)
-    recommended_items = [item for index, item in enumerate(filtered_clothes) if f"item_{index}" in recommended_item_ids]
-
-    for item in recommended_items:
-        st.write(f"Brand: {item['brandName']}")
-        st.write(f"Description: {item['description']}")
-        st.image(item['imageLink'])
-        st.write(f"Price: {item['price']}")
-        st.write(f"Sizes: {item['sizes']}")
-        st.write("------")
-
 # Generate DALL-E Image
 st.header("See Some Surprise!")
 if st.button("Generate"):
@@ -178,3 +130,52 @@ if st.button("Generate"):
 
     # Display the image
     st.image(image_url)
+
+# Filter clothes based on user preferences and sizes
+filtered_clothes = [item for item in clothes_data 
+                    if (not favorite_brands or favorite_brands in item.get("brandName", "").lower())
+                    and (not sizes or any(size in item.get("sizes", "") for size in sizes))
+                    and (not looking_for or looking_for.lower() in item.get("description", "").lower() or looking_for.lower() in item.get("brandName", "").lower())]
+
+# Get recommendations from the filtered clothes
+for index, item in enumerate(filtered_clothes):
+    item_id = f"item_{index}"  # Generate an ID using index
+    try:
+        client.send(AddItem(item_id, {'brandName': item['brandName'], 'description': item['description'], 'imageLink': item['imageLink'], 'price': item['price'], 'sizes': item['sizes']}))
+    except KeyError:
+        print(f"Skipping item due to missing key: {item}")
+
+# Display some recommendations
+st.header("Recommended for you")
+recommended_item_ids = get_recommendations(st.session_state.username, 10)
+recommended_items = [item for index, item in enumerate(filtered_clothes) if f"item_{index}" in recommended_item_ids]
+
+for item in recommended_items:
+    col1, col2 = st.beta_columns(2)
+    with col1:
+        st.write(f"Brand: {item['brandName']}")
+        st.write(f"Description: {item['description']}")
+        st.write(f"Price: {item['price']}")
+        st.write(f"Sizes: {item['sizes']}")
+    with col2:
+        st.image(item['imageLink'])
+    st.write("------")
+
+# Display filtered clothes
+st.header("Filtered Clothes for You")
+for item in filtered_clothes:
+    col1, col2 = st.beta_columns(2)
+    with col1:
+        st.write(f"Brand: {item['brandName']}")
+        st.write(f"Description: {item['description']}")
+        st.write(f"Price: {item['price']}")
+        st.write(f"Sizes: {item['sizes']}")
+    with col2:
+        st.image(item['imageLink'])
+    st.write("------")
+
+# End of the chat
+if st.button("End Chat"):
+    # Clear the conversation
+    st.session_state.conversation = []
+    st.success("Chat ended.")
