@@ -3,7 +3,7 @@ import json
 import requests
 from PIL import Image
 import os
-from recombee_api_client.api_client import RecombeeClient
+from recombee_api_client.api_client import RecombeeClient, Region
 from recombee_api_client.api_requests import AddItem, AddDetailView, RecommendItemsToUser
 import openai
 
