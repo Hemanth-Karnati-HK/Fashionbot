@@ -7,13 +7,13 @@ from recombee_api_client.api_client import RecombeeClient, Region
 from recombee_api_client.api_requests import AddItem, AddDetailView, RecommendItemsToUser
 import openai
 
-# Your keys should be stored in a secure manner, not directly in the code
-openai.api_key = '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'
-client = RecombeeClient('refine-dev', 'BFozzPb3yjxny8p321hDfT5TQPRQF7ytoFvAKT9dIwDJD9M9Rx7HclcgrkGPCnh9',region=Region.US_WEST)
+
+openai.api_key = 'place holder'
+client = RecombeeClient('place holder', 'place holder',region=Region.US_WEST)
 
 # Load JSON data from files in a directory
 clothes_data = []
-for file_name in os.listdir('data'):  # replace with your directory
+for file_name in os.listdir('data'):  
     if file_name.endswith('.json'):
         with open(os.path.join('data', file_name)) as f:
             clothes_data.extend(json.load(f))
